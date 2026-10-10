@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from backend.prototype_model import (
+from backend.risk_engine import (
     FEATURE_SCHEMA,
     METRICS,
     SAMPLE_PATIENTS,
@@ -55,7 +55,7 @@ class CounterfactualRequest(BaseModel):
 
 @app.get("/health")
 def health() -> Dict[str, str]:
-    return {"status": "ok", "mode": "prototype"}
+    return {"status": "ok", "mode": "demo"}
 
 
 @app.get("/schema")

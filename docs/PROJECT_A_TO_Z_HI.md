@@ -8,7 +8,7 @@ predict karega, aur frontend 3D heart par risk ko color/thickness se show karega
 
 ## Track A judging ke hisab se parts
 
-1. Predictive performance: real dataset par honest validation, repeated CV,
+1. Predictive performance: real dataset par validation, repeated CV,
    ROC-AUC, F1, recall, calibration.
 2. 3D visualization: heart + LAD/LCX/RCA arteries, risk-based color and narrowing.
 3. Interpretability: SHAP top features, plain-language explanation.
@@ -18,7 +18,7 @@ predict karega, aur frontend 3D heart par risk ko color/thickness se show karega
 ## Leakage ka sabse important rule
 
 LAD, LCX, RCA, Cath jaise columns target labels hain. Inko model input feature
-ke roop me kabhi use nahi karna. Agar ye input me chale gaye to model fake high
+ke roop me kabhi use nahi karna. Agar ye input me chale gaye to model incorrect high
 accuracy dikhayega. Isliye code me `LEAKAGE_COLUMNS` constant aur tests hone
 chahiye.
 

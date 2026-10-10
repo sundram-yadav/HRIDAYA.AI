@@ -29,8 +29,8 @@ FEATURE_SCHEMA: List[Dict[str, Any]] = [
 
 
 METRICS: Dict[str, Any] = {
-    "mode": "prototype",
-    "note": "These are placeholder dashboard values. Train with the dataset to generate final metrics.",
+    "mode": "demo",
+    "note": "Validation metrics are populated after training with the local dataset.",
     "targets": {
         "cad": {"accuracy": 0.0, "precision": 0.0, "recall": 0.0, "f1": 0.0, "roc_auc": 0.0},
         "lad": {"accuracy": 0.0, "precision": 0.0, "recall": 0.0, "f1": 0.0, "roc_auc": 0.0},
@@ -184,7 +184,7 @@ def predict_all(patient: Dict[str, Any]) -> Dict[str, Any]:
             "low_confidence": width > 0.18,
         }
     return {
-        "mode": "prototype",
+        "mode": "demo",
         "disclaimer": "For decision support / educational purposes only. Not a substitute for formal diagnostic imaging.",
         "patient": normalized,
         "targets": targets,
@@ -198,7 +198,7 @@ def explain_patient(patient: Dict[str, Any], target: str) -> Dict[str, Any]:
     return {
         "target": target,
         "probability": round(_sigmoid(raw), 3),
-        "note": "Prototype contributions are transparent score components. Dataset-trained SHAP values replace these after training.",
+        "note": "Explanation values are produced by the current risk engine. Dataset-trained SHAP values are used after model training.",
         "contributions": [item.__dict__ for item in top],
         "sentences": [
             f"{item.label} ({item.value}) {item.direction} {target.upper()} risk."

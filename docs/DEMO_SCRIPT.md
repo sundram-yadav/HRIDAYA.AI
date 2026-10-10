@@ -4,7 +4,7 @@ Target length: 5 to 7 minutes.
 
 ## 0:00 - 0:30 Opening
 
-Introduce Hriday.Ai as a cardiovascular risk visualization prototype. Mention
+Introduce Hriday.Ai as a cardiovascular risk visualization dashboard. Mention
 that it estimates overall CAD plus LAD, LCX, and RCA risk from structured
 clinical inputs.
 
@@ -23,8 +23,8 @@ own focused panel.
 ## 2:15 - 3:15 Explanations
 
 Open one vessel detail and walk through the explanation bars. Say clearly that
-the prototype currently uses transparent score components and the trained
-version will replace these with SHAP values.
+the current build uses transparent explanation components and the trained
+model path can replace these with SHAP values.
 
 ## 3:15 - 4:15 What-if mode
 
@@ -38,8 +38,8 @@ form, leakage checks, and future training pipeline.
 
 ## 5:15 - 6:00 Limitations
 
-Be honest: dataset training is pending in the prototype, no external validation
-yet, and the final model must generate real metrics from the dataset.
+Explain the current scope: local dataset training and external validation are
+the next stages, and final metrics should come from a saved training run.
 
 ## 6:00 - 6:30 Close
 

@@ -125,7 +125,7 @@ function App() {
       <header className="topbar">
         <div>
           <span className="brand">Hriday.Ai</span>
-          <p>Cardiovascular risk visualization prototype</p>
+          <p>Cardiovascular risk visualization dashboard</p>
         </div>
         <button className="ghost" onClick={() => setPlain((value) => !value)}>
           {plain ? 'Clinician view' : 'Plain-language view'}

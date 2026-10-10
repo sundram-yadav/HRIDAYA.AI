@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from backend.app import app
-from backend.prototype_model import normalize_patient
+from backend.risk_engine import normalize_patient
 
 
 client = TestClient(app)

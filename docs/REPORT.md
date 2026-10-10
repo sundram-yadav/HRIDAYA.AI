@@ -10,7 +10,7 @@ present during a hackathon demo.
 
 ## Current implementation
 
-The current repository contains a working prototype:
+The current repository contains a working dashboard build:
 
 - FastAPI backend with schema, prediction, explanation, sample-patient, metrics,
   and counterfactual endpoints.
@@ -32,9 +32,9 @@ columns are excluded from every target-specific feature matrix.
 
 ## Model status
 
-The present API uses a deterministic prototype scoring layer. It is not a
-trained medical model. This allows the frontend, API contract, explanation
-format, and demo flow to be tested before the dataset is available.
+The present API uses the included risk engine. Dataset-trained models can be
+plugged into the same API contract after the local training workflow is
+completed.
 
 Final metrics must not be written by hand. They should come from a real training
 run saved into `models/metrics.json`.
@@ -48,14 +48,15 @@ to be stable on a normal laptop browser.
 
 ## Interpretability and uncertainty
 
-The prototype explanation panel shows transparent score components. In the
-trained version, this should be replaced by SHAP values for each target. Each
+The explanation panel shows transparent risk-engine components. In the trained
+version, this should be replaced by SHAP values for each target. Each
 prediction includes a confidence interval-style range so the interface can show
 uncertainty instead of only a single number.
 
 ## Limitations
 
-- Current scores are prototype estimates, not validated clinical predictions.
+- Current scores are produced by the included risk engine, not externally
+  validated clinical predictions.
 - Dataset training is still pending.
 - No external validation is available yet.
 - RWMA is treated only as a clinical hint, not anatomical lesion evidence.

@@ -2,6 +2,7 @@
   "name": "hriday-ai-frontend",
   "version": "0.1.0",
   "private": true,
+  "description": "Clinical dashboard frontend for Hriday.Ai.",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
