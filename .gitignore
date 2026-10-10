@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Data and generated model artifacts
+data/*
+!data/.gitkeep
+models/*
+!models/.gitkeep
+docs/figures/*
+!docs/figures/.gitkeep
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
