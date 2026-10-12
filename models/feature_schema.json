@@ -1,0 +1,956 @@
+{
+  "n_rows": 303,
+  "n_features": 56,
+  "leakage_columns": [
+    "LAD",
+    "LCX",
+    "RCA",
+    "Cath",
+    "CAD",
+    "lad",
+    "lcx",
+    "rca",
+    "cath",
+    "cad"
+  ],
+  "dropped_constant": [
+    "Exertional_CP"
+  ],
+  "encodings": {
+    "Sex": {
+      "Male": 1,
+      "Fmale": 0
+    },
+    "Obesity": {
+      "N": 0,
+      "Y": 1
+    },
+    "CRF": {
+      "N": 0,
+      "Y": 1
+    },
+    "CVA": {
+      "N": 0,
+      "Y": 1
+    },
+    "Airway_disease": {
+      "N": 0,
+      "Y": 1
+    },
+    "Thyroid_Disease": {
+      "N": 0,
+      "Y": 1
+    },
+    "CHF": {
+      "N": 0,
+      "Y": 1
+    },
+    "DLP": {
+      "N": 0,
+      "Y": 1
+    },
+    "Weak_Peripheral_Pulse": {
+      "N": 0,
+      "Y": 1
+    },
+    "Lung_rales": {
+      "N": 0,
+      "Y": 1
+    },
+    "Systolic_Murmur": {
+      "N": 0,
+      "Y": 1
+    },
+    "Diastolic_Murmur": {
+      "N": 0,
+      "Y": 1
+    },
+    "Dyspnea": {
+      "N": 0,
+      "Y": 1
+    },
+    "Atypical": {
+      "N": 0,
+      "Y": 1
+    },
+    "Nonanginal": {
+      "N": 0,
+      "Y": 1
+    },
+    "Exertional_CP": {
+      "N": 0,
+      "Y": 1
+    },
+    "LowTH_Ang": {
+      "N": 0,
+      "Y": 1
+    },
+    "LVH": {
+      "N": 0,
+      "Y": 1
+    },
+    "Poor_R_Progression": {
+      "N": 0,
+      "Y": 1
+    },
+    "BBB": {
+      "N": 0,
+      "LBBB": 1,
+      "RBBB": 2
+    },
+    "VHD": {
+      "N": 0,
+      "mild": 1,
+      "Moderate": 2,
+      "Severe": 3
+    },
+    "LAD": {
+      "Normal": 0,
+      "Stenotic": 1
+    },
+    "LCX": {
+      "Normal": 0,
+      "Stenotic": 1
+    },
+    "RCA": {
+      "Normal": 0,
+      "Stenotic": 1
+    },
+    "Cath": {
+      "Normal": 0,
+      "CAD": 1
+    }
+  },
+  "features": [
+    {
+      "name": "Age",
+      "label": "Age",
+      "group": "Demographics",
+      "type": "number",
+      "unit": "years",
+      "hint": null,
+      "min": 30,
+      "max": 86,
+      "default": 58
+    },
+    {
+      "name": "Weight",
+      "label": "Weight",
+      "group": "Demographics",
+      "type": "number",
+      "unit": "kg",
+      "hint": null,
+      "min": 48,
+      "max": 120,
+      "default": 74
+    },
+    {
+      "name": "Length",
+      "label": "Height",
+      "group": "Demographics",
+      "type": "number",
+      "unit": "cm",
+      "hint": null,
+      "min": 140,
+      "max": 188,
+      "default": 165
+    },
+    {
+      "name": "Sex",
+      "label": "Sex",
+      "group": "Demographics",
+      "type": "category",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        "Male",
+        "Fmale"
+      ],
+      "default": "Male",
+      "encoding": {
+        "Male": 1,
+        "Fmale": 0
+      }
+    },
+    {
+      "name": "BMI",
+      "label": "BMI",
+      "group": "Demographics",
+      "type": "number",
+      "unit": "kg/m2",
+      "hint": null,
+      "min": 18.115412710007302,
+      "max": 40.90065778377467,
+      "default": 26.78
+    },
+    {
+      "name": "DM",
+      "label": "Diabetes mellitus",
+      "group": "Risk factors",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0
+    },
+    {
+      "name": "HTN",
+      "label": "Hypertension",
+      "group": "Risk factors",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0
+    },
+    {
+      "name": "Current_Smoker",
+      "label": "Current smoker",
+      "group": "Risk factors",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0
+    },
+    {
+      "name": "EX_Smoker",
+      "label": "Ex-smoker",
+      "group": "Risk factors",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0
+    },
+    {
+      "name": "FH",
+      "label": "Family history of CAD",
+      "group": "Risk factors",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0
+    },
+    {
+      "name": "Obesity",
+      "label": "Obesity",
+      "group": "Risk factors",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "CRF",
+      "label": "Chronic renal failure",
+      "group": "Risk factors",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "CVA",
+      "label": "Cerebrovascular accident",
+      "group": "Risk factors",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "Airway_disease",
+      "label": "Airway disease",
+      "group": "Risk factors",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "Thyroid_Disease",
+      "label": "Thyroid disease",
+      "group": "Risk factors",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "CHF",
+      "label": "Congestive heart failure",
+      "group": "Risk factors",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "DLP",
+      "label": "Dyslipidemia",
+      "group": "Risk factors",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "BP",
+      "label": "Systolic BP",
+      "group": "Vitals",
+      "type": "number",
+      "unit": "mmHg",
+      "hint": null,
+      "min": 90,
+      "max": 190,
+      "default": 130
+    },
+    {
+      "name": "PR",
+      "label": "Pulse rate",
+      "group": "Vitals",
+      "type": "number",
+      "unit": "bpm",
+      "hint": null,
+      "min": 50,
+      "max": 110,
+      "default": 70
+    },
+    {
+      "name": "Edema",
+      "label": "Edema",
+      "group": "Vitals",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0
+    },
+    {
+      "name": "Weak_Peripheral_Pulse",
+      "label": "Weak peripheral pulse",
+      "group": "Vitals",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "Lung_rales",
+      "label": "Lung rales",
+      "group": "Symptoms",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "Systolic_Murmur",
+      "label": "Systolic murmur",
+      "group": "Exam",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "Diastolic_Murmur",
+      "label": "Diastolic murmur",
+      "group": "Exam",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "Typical_Chest_Pain",
+      "label": "Typical chest pain",
+      "group": "Symptoms",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0
+    },
+    {
+      "name": "Dyspnea",
+      "label": "Dyspnea",
+      "group": "Symptoms",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "Function_Class",
+      "label": "Function class",
+      "group": "Symptoms",
+      "type": "number",
+      "unit": null,
+      "hint": null,
+      "min": 0,
+      "max": 3,
+      "default": 0
+    },
+    {
+      "name": "Atypical",
+      "label": "Atypical chest pain",
+      "group": "Symptoms",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "Nonanginal",
+      "label": "Nonanginal chest pain",
+      "group": "Symptoms",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "LowTH_Ang",
+      "label": "Low-threshold angina",
+      "group": "Symptoms",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "Q_Wave",
+      "label": "Q wave",
+      "group": "ECG",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0
+    },
+    {
+      "name": "St_Elevation",
+      "label": "ST elevation",
+      "group": "ECG",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0
+    },
+    {
+      "name": "St_Depression",
+      "label": "ST depression",
+      "group": "ECG",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0
+    },
+    {
+      "name": "Tinversion",
+      "label": "T inversion",
+      "group": "ECG",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0
+    },
+    {
+      "name": "LVH",
+      "label": "LVH",
+      "group": "ECG",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "Poor_R_Progression",
+      "label": "Poor R progression",
+      "group": "ECG",
+      "type": "boolean",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        0,
+        1
+      ],
+      "default": 0,
+      "encoding": {
+        "N": 0,
+        "Y": 1
+      }
+    },
+    {
+      "name": "BBB",
+      "label": "Bundle branch block",
+      "group": "ECG",
+      "type": "category",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        "N",
+        "LBBB",
+        "RBBB"
+      ],
+      "default": "N",
+      "encoding": {
+        "N": 0,
+        "LBBB": 1,
+        "RBBB": 2
+      }
+    },
+    {
+      "name": "FBS",
+      "label": "Fasting blood sugar",
+      "group": "Labs",
+      "type": "number",
+      "unit": "mg/dL",
+      "hint": null,
+      "min": 62,
+      "max": 400,
+      "default": 98
+    },
+    {
+      "name": "CR",
+      "label": "Creatinine",
+      "group": "Labs",
+      "type": "number",
+      "unit": "mg/dL",
+      "hint": null,
+      "min": 0.5,
+      "max": 2.2,
+      "default": 1.0
+    },
+    {
+      "name": "TG",
+      "label": "Triglycerides",
+      "group": "Labs",
+      "type": "number",
+      "unit": "mg/dL",
+      "hint": null,
+      "min": 37,
+      "max": 1050,
+      "default": 122
+    },
+    {
+      "name": "LDL",
+      "label": "LDL",
+      "group": "Labs",
+      "type": "number",
+      "unit": "mg/dL",
+      "hint": null,
+      "min": 18,
+      "max": 232,
+      "default": 100
+    },
+    {
+      "name": "HDL",
+      "label": "HDL",
+      "group": "Labs",
+      "type": "number",
+      "unit": "mg/dL",
+      "hint": null,
+      "min": 15.9,
+      "max": 111.0,
+      "default": 39.0
+    },
+    {
+      "name": "BUN",
+      "label": "BUN",
+      "group": "Labs",
+      "type": "number",
+      "unit": "mg/dL",
+      "hint": null,
+      "min": 6,
+      "max": 52,
+      "default": 16
+    },
+    {
+      "name": "ESR",
+      "label": "ESR",
+      "group": "Labs",
+      "type": "number",
+      "unit": "mm/h",
+      "hint": null,
+      "min": 1,
+      "max": 90,
+      "default": 15
+    },
+    {
+      "name": "HB",
+      "label": "Hemoglobin",
+      "group": "Labs",
+      "type": "number",
+      "unit": "g/dL",
+      "hint": null,
+      "min": 8.9,
+      "max": 17.6,
+      "default": 13.2
+    },
+    {
+      "name": "K",
+      "label": "Potassium",
+      "group": "Labs",
+      "type": "number",
+      "unit": "mEq/L",
+      "hint": null,
+      "min": 3.0,
+      "max": 6.6,
+      "default": 4.2
+    },
+    {
+      "name": "Na",
+      "label": "Sodium",
+      "group": "Labs",
+      "type": "number",
+      "unit": "mEq/L",
+      "hint": null,
+      "min": 128,
+      "max": 156,
+      "default": 141
+    },
+    {
+      "name": "WBC",
+      "label": "WBC",
+      "group": "Labs",
+      "type": "number",
+      "unit": "/\u00b5L",
+      "hint": null,
+      "min": 3700,
+      "max": 18000,
+      "default": 7100
+    },
+    {
+      "name": "Lymph",
+      "label": "Lymphocytes",
+      "group": "Labs",
+      "type": "number",
+      "unit": "%",
+      "hint": null,
+      "min": 7,
+      "max": 60,
+      "default": 32
+    },
+    {
+      "name": "Neut",
+      "label": "Neutrophils",
+      "group": "Labs",
+      "type": "number",
+      "unit": "%",
+      "hint": null,
+      "min": 32,
+      "max": 89,
+      "default": 60
+    },
+    {
+      "name": "PLT",
+      "label": "Platelets",
+      "group": "Labs",
+      "type": "number",
+      "unit": "\u00d710^3/\u00b5L",
+      "hint": null,
+      "min": 25,
+      "max": 742,
+      "default": 210
+    },
+    {
+      "name": "EF_TTE",
+      "label": "Ejection fraction (TTE)",
+      "group": "Echo",
+      "type": "number",
+      "unit": "%",
+      "hint": null,
+      "min": 15,
+      "max": 60,
+      "default": 50
+    },
+    {
+      "name": "Region_RWMA",
+      "label": "Region with RWMA",
+      "group": "Echo",
+      "type": "number",
+      "unit": null,
+      "hint": "clinical hint, not anatomical evidence",
+      "min": 0,
+      "max": 4,
+      "default": 0
+    },
+    {
+      "name": "VHD",
+      "label": "Valvular heart disease",
+      "group": "Echo",
+      "type": "category",
+      "unit": null,
+      "hint": null,
+      "allowed_values": [
+        "N",
+        "mild",
+        "Severe",
+        "Moderate"
+      ],
+      "default": "mild",
+      "encoding": {
+        "N": 0,
+        "mild": 1,
+        "Moderate": 2,
+        "Severe": 3
+      }
+    },
+    {
+      "name": "ldl_hdl_ratio",
+      "label": "LDL/HDL ratio",
+      "group": "Labs",
+      "type": "number",
+      "unit": "ratio",
+      "min": 0.5769230769230769,
+      "max": 6.226415094339623,
+      "default": 2.5641025641025643,
+      "engineered": true,
+      "derived_from": [
+        "LDL",
+        "HDL"
+      ]
+    },
+    {
+      "name": "tg_hdl_ratio",
+      "label": "TG/HDL ratio",
+      "group": "Labs",
+      "type": "number",
+      "unit": "ratio",
+      "min": 0.5,
+      "max": 23.863636363636363,
+      "default": 3.1818181818181817,
+      "engineered": true,
+      "derived_from": [
+        "TG",
+        "HDL"
+      ]
+    }
+  ],
+  "feature_names": [
+    "Age",
+    "Weight",
+    "Length",
+    "Sex",
+    "BMI",
+    "DM",
+    "HTN",
+    "Current_Smoker",
+    "EX_Smoker",
+    "FH",
+    "Obesity",
+    "CRF",
+    "CVA",
+    "Airway_disease",
+    "Thyroid_Disease",
+    "CHF",
+    "DLP",
+    "BP",
+    "PR",
+    "Edema",
+    "Weak_Peripheral_Pulse",
+    "Lung_rales",
+    "Systolic_Murmur",
+    "Diastolic_Murmur",
+    "Typical_Chest_Pain",
+    "Dyspnea",
+    "Function_Class",
+    "Atypical",
+    "Nonanginal",
+    "LowTH_Ang",
+    "Q_Wave",
+    "St_Elevation",
+    "St_Depression",
+    "Tinversion",
+    "LVH",
+    "Poor_R_Progression",
+    "BBB",
+    "FBS",
+    "CR",
+    "TG",
+    "LDL",
+    "HDL",
+    "BUN",
+    "ESR",
+    "HB",
+    "K",
+    "Na",
+    "WBC",
+    "Lymph",
+    "Neut",
+    "PLT",
+    "EF_TTE",
+    "Region_RWMA",
+    "VHD",
+    "ldl_hdl_ratio",
+    "tg_hdl_ratio"
+  ]
+}

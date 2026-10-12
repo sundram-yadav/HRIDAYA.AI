@@ -1,47 +1,59 @@
-# Demo Script
+# Six-minute demo script
 
-Target length: 5 to 7 minutes.
+## 0:00–0:35 — Introduce the project
 
-## 0:00 - 0:30 Opening
+“HRIDAYA.AI is an educational cardiovascular-risk visualization prototype. It
+estimates angiographic CAD and LAD, LCX, and RCA labels from structured clinical
+features. These internal validation estimates are not diagnoses.”
 
-Introduce Hriday.Ai as a cardiovascular risk visualization dashboard. Mention
-that it estimates overall CAD plus LAD, LCX, and RCA risk from structured
-clinical inputs.
+Show the permanent disclaimer banner and mention the 303-patient,
+single-centre-data limitation.
 
-## 0:30 - 1:15 Disclaimer and layout
+## 0:35–1:20 — Show the dashboard
 
-Point to the disclaimer at the top. Explain that this is not a diagnostic tool.
-Show the main layout: heart visualization on the left, risk cards and
-explanation panel on the right, patient inputs below.
+Point out the procedural 3D heart, separate risk cards, schema-driven patient
+form, and the live prediction flow. Explain that `Cath`, `LAD`, `LCX`, and `RCA`
+are labels excluded from every model input.
 
-## 1:15 - 2:15 Sample patient
+## 1:20–2:10 — Load a real sample
 
-Load the higher risk sample patient. Show how the CAD and vessel probabilities
-change. Click LAD, LCX, and RCA one by one and explain that each vessel has its
-own focused panel.
+Choose the higher-risk sample from the dropdown. Show the four probabilities,
+their model-spread ranges, and the confidence warning if displayed. State that
+these are cross-validated models trained on a small dataset, not clinical
+probabilities.
 
-## 2:15 - 3:15 Explanations
+## 2:10–3:05 — Explore anatomy and explanations
 
-Open one vessel detail and walk through the explanation bars. Say clearly that
-the current build uses transparent explanation components and the trained
-model path can replace these with SHAP values.
+Rotate and zoom the heart, click LAD, LCX, and RCA, and show the color/shape cue
+and camera focus. Open a vessel explanation and read one positive and one
+negative SHAP contribution. Clarify that SHAP describes model behavior, not
+causal effects. If RWMA is present, point out its “clinical hint, not anatomical
+evidence” label.
 
-## 3:15 - 4:15 What-if mode
+## 3:05–4:10 — Illustrative what-if
 
-Click "Suggest changes." Explain that the suggestions are illustrative only and
-not medical advice. Show the before and after risk estimate.
+Enter what-if mode and change one or two inputs. Show the percentage-point
+change from the remembered baseline. Run “Suggest changes” and read the
+illustrative-only warning. Do not present the suggested values as medical
+advice.
 
-## 4:15 - 5:15 Technical architecture
+## 4:10–5:10 — Validation metrics
 
-Briefly describe the architecture: React frontend, FastAPI backend, schema-driven
-form, leakage checks, and future training pipeline.
+Open the metrics tab. Point out ROC-AUC, F1, and recall mean ± standard
+deviation from repeated stratified five-fold CV. Note that LCX/RCA scores are
+modest, calibration did not help RCA Brier score, and no external validation
+has been done.
 
-## 5:15 - 6:00 Limitations
+## 5:10–6:00 — Close with limitations
 
-Explain the current scope: local dataset training and external validation are
-the next stages, and final metrics should come from a saved training run.
+“This prototype helps visualize model outputs and their feature contributions.
+It has only 303 single-centre records, no external validation, and is not for
+clinical use.” End by showing the disclaimer/footer.
 
-## 6:00 - 6:30 Close
+## Recording checklist
 
-Summarize the value: one place to enter clinical features, inspect vessel risk,
-see uncertainty, and understand the factors behind the estimate.
+- Use a 3–10 minute recording, preferably around six minutes.
+- Close private tabs and hide local credentials/notifications.
+- Use the local `.\run_all.bat` app or the final verified public demo.
+- Test microphone and screen share first; OBS or Loom are suitable.
+- Re-check the uploaded video permissions and paste its URL into the submission checklist.

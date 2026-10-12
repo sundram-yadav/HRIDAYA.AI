@@ -1,218 +1,202 @@
-# Hriday.Ai
+# HRIDAYA.AI
 
-Hriday.Ai is a cardiovascular risk visualization dashboard for structured
-clinical data. It estimates overall coronary artery disease risk and vessel-wise
-risk for LAD, LCX, and RCA, then presents the result through a focused clinical
-interface.
+HRIDAYA.AI is an educational cardiovascular risk-visualization prototype. It
+estimates angiographic CAD and LAD, LCX, and RCA stenosis labels from clinical
+features, displays the estimates on a lightweight interactive heart, and
+provides patient-level SHAP explanations.
 
-The project is organized as a full-stack application:
+> **Medical disclaimer:** For decision support / educational purposes only. Not
+> a substitute for formal diagnostic imaging. This is not a medical device and
+> must not guide patient care.
 
-- FastAPI service for schema, prediction, explanation, sample cases, and what-if
-  analysis
-- React + Vite dashboard for patient inputs, vessel risk cards, and heart-view
-  visualization
-- Python ML workspace for dataset loading, leakage checks, and future model
-  training
-- Test suite for API health, prediction flow, and leakage rejection
+## Screenshots
 
-## Medical disclaimer
+Add project screenshots here before submission:
 
-For decision support / educational purposes only. Not a substitute for formal
-diagnostic imaging.
+| Dashboard | Vessel explanation | Validation metrics |
+| --- | --- | --- |
+| _Screenshot pending_ | _Screenshot pending_ | _Screenshot pending_ |
 
-The dashboard displays this message in the main interface and the API also
-returns it with prediction responses.
+## Implemented features
 
-## Features
+- Schema-driven patient form and low / intermediate / higher-risk examples
+- CAD, LAD, LCX, and RCA probabilities, approximate bootstrap-model ranges, and
+  low-confidence indicators
+- Low-poly procedural heart fallback and configurable LAD/LCX/RCA paths;
+  probability changes vessel color and a localized stenosis cue
+- SHAP patient explanations, classifier-chain ablation, validation metrics,
+  ROC / confusion / calibration / SHAP figures
+- Illustrative what-if suggestions for selected modifiable vitals and labs
+- English and Hindi copy, clinician/plain-language labels, dark/light theme,
+  keyboard focus, and mobile layout
+- Backend input checks and runtime rejection of target/leakage fields
 
-- Schema-driven patient input form
-- Overall CAD, LAD, LCX, and RCA risk estimates
-- Confidence interval-style ranges for every target
-- Sample low, medium, and high risk cases for demo flow
-- Vessel-focused explanation panel
-- What-if suggestions for modifiable factors
-- Runtime rejection of target/leakage columns
-- Responsive dashboard layout
-- Clean setup scripts for Windows and Unix-like environments
+## Results from the saved run
 
-## Repository layout
+These are the real repeated-stratified-5-fold CV means and standard deviations
+in [`models/metrics.json`](./models/metrics.json), generated with seed 42 on 303
+single-centre patients. They are internal validation results, not external
+clinical performance estimates.
 
-```text
-backend/        FastAPI application and risk engine
-data/           Local dataset directory; source data is not committed
-docs/           Report draft, demo script, testing notes, setup notes
-frontend/       React + Vite dashboard
-ml/             Dataset loading, preprocessing helpers, training entry point
-models/         Generated model artifacts; not committed by default
-tests/          Backend and leakage tests
-```
+| Target | Selected model | ROC-AUC | F1 | Recall |
+| --- | --- | ---: | ---: | ---: |
+| CAD | Soft voting | 0.923 ± 0.034 | 0.898 ± 0.034 | 0.874 ± 0.054 |
+| LAD | Random forest | 0.850 ± 0.046 | 0.817 ± 0.030 | 0.826 ± 0.057 |
+| LCX | Random forest | 0.729 ± 0.057 | 0.605 ± 0.056 | 0.620 ± 0.073 |
+| RCA | Soft voting | 0.727 ± 0.059 | 0.575 ± 0.088 | 0.598 ± 0.126 |
 
-## Quick start
+LCX/RCA performance is modest and should be treated cautiously. Calibration
+helped CAD, LAD, and LCX Brier scores in the saved comparison; RCA Brier score
+did not improve (0.203 before vs 0.205 after). There is no external validation.
 
-### Backend
+## Requirements
 
-```powershell
-cd "C:\Users\sundr\OneDrive\Desktop\Hriday.Ai"
-py -m venv .venv
-.\.venv\Scripts\activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-uvicorn backend.app:app --reload --host 127.0.0.1 --port 8000
-```
+- Python 3.14 (the pinned Python dependencies were installed and tested in this
+  workspace; other Python versions may need compatible pins)
+- Node.js 20.19 or later and npm
+- The UCI Z-Alizadeh Sani extension dataset at
+  `data/z_alizadeh_sani_extension.xlsx`; it is intentionally not committed
 
-### Frontend
+## Run the app
 
-Open a second terminal:
-
-```powershell
-cd "C:\Users\sundr\OneDrive\Desktop\Hriday.Ai\frontend"
-npm install
-npm run dev
-```
-
-Open the app:
-
-```text
-http://127.0.0.1:5173
-```
-
-API base URL:
-
-```text
-http://127.0.0.1:8000
-```
-
-## Windows helper
+From the repository root in PowerShell, after installing the requirements
+above, the one-command Windows launcher installs Python dependencies if
+needed, trains missing artifacts, and starts both development servers:
 
 ```powershell
 .\run_all.bat
 ```
 
-This installs dependencies if needed, starts the FastAPI server, then starts the
-frontend development server.
+Open `http://127.0.0.1:5173`. The API listens at `http://127.0.0.1:8000`.
+For Unix-like environments use `./run_all.sh`.
 
-## Environment files
+To retrain all artifacts from scratch:
 
-Tracked example:
-
-```text
-.env.example
-frontend/.env.example
+```powershell
+.\.venv\Scripts\python.exe -m ml.run_all
 ```
 
-Local environment files:
+The pipeline writes the dataset summary, feature schema, models, metrics,
+synthetic demo patients, and validation figures. Do not edit reported metrics
+by hand.
 
-```text
-.env
-frontend/.env
+## Manual development commands
+
+Backend, from the repository root:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn backend.app:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Local `.env` files are ignored by git so private machine-specific settings do
-not get committed.
+Frontend, from `frontend`:
 
-## API endpoints
+```powershell
+npm ci
+npm run dev
+```
+
+To point the frontend at another API, copy `frontend/.env.example` to
+`frontend/.env` and set `VITE_API_URL`. The backend permits the local Vite
+origins and an optional production origin via `ALLOWED_ORIGIN` (or
+`FRONTEND_ORIGIN`; `ALLOWED_ORIGINS` accepts a comma-separated list).
+
+## Deploy on Render
+
+`render.yaml` defines the FastAPI API and Vite static site as a Render
+Blueprint. Push to `main`, create a Blueprint in Render from this repository,
+then set the API service's `ALLOWED_ORIGIN` to the static site's exact HTTPS
+origin. Follow [`docs/RENDER_DEPLOYMENT.md`](./docs/RENDER_DEPLOYMENT.md) for
+the complete deployment and live-smoke-test steps. Production configuration
+is set in Render; do not commit a production `.env` file.
+
+## API
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| GET | `/health` | Server status |
-| GET | `/schema` | Input schema for the dashboard |
-| GET | `/metrics` | Current validation metrics/status |
-| GET | `/sample-patients` | Demo cases |
-| POST | `/predict` | CAD/LAD/LCX/RCA risk estimates |
-| POST | `/explain` | Explanation values for one target |
-| POST | `/counterfactual` | What-if suggestions |
+| GET | `/health` | Readiness and trained/untrained status |
+| GET | `/schema` | Input fields and leakage-column names |
+| GET | `/metrics` | Saved cross-validation results and figure names |
+| GET | `/sample-patients` | Synthetic low / intermediate / higher-risk examples |
+| GET | `/figures/{name}` | A generated validation figure |
+| POST | `/predict` | Four probabilities, bootstrap-model ranges, confidence flags |
+| POST | `/explain` | Up to eight patient-level SHAP contributions |
+| POST | `/counterfactual` | Illustrative what-if changes; not medical advice |
 
-Example request:
+Example request (feature names and categorical spelling follow `/schema`):
 
 ```powershell
 Invoke-RestMethod -Method Post `
   -Uri http://127.0.0.1:8000/predict `
   -ContentType "application/json" `
-  -Body '{"patient":{"age":62,"sex":"male","typical_chest_pain":true}}'
+  -Body '{"patient":{"Age":62,"Sex":"Male","Typical_Chest_Pain":1}}'
 ```
 
-## Data and training
+## Data, model, and leakage
 
-The final trained model is intended to use the Z-Alizadeh Sani extension
-dataset. The dataset is not stored in the repository. Place the CSV or Excel
-file in `data/`, then run:
+The UCI extension contains 303 patients and 59 fields. `Cath` supplies the
+overall CAD target; `LAD`, `LCX`, and `RCA` supply vessel targets. All four
+labels are removed from every model's inputs. The raw data inspection is in
+[`docs/data_summary.md`](./docs/data_summary.md); the shared blocklist and
+assertions are in [`ml/leakage.py`](./ml/leakage.py). Unknown feature names,
+invalid categories, and out-of-range inputs fail with an explicit 400 response.
 
-```powershell
-.\.venv\Scripts\activate
-python -m ml.preprocess
-python -m ml.train
-```
+The model compares logistic regression, random forest, and XGBoost, tunes
+within training folds, chooses per-target models by nested CV ROC-AUC, checks
+class-weighting / feature selection / oversampling / soft voting, and evaluates
+a classifier-chain ablation. Patient ranges are the 2.5th–97.5th percentiles
+of eight bootstrap-refitted model predictions; they show model spread and are
+**not clinically calibrated confidence intervals**.
 
-The current training entry point loads the dataset and prepares the path for the
-full pipeline. The next training stage should add target mapping, cross-validated
-model selection, calibration, SHAP values, saved model artifacts, and real
-metrics written to `models/`.
-
-## Leakage prevention
-
-The project treats target-like columns as blocked inputs. These include:
-
-```text
-Cath, CAD, LAD, LCX, RCA
-```
-
-Guardrails:
-
-- `backend/risk_engine.py` rejects these fields in runtime input.
-- `ml/preprocess.py` provides `LEAKAGE_COLUMNS` and `assert_no_leakage()`.
-- `tests/test_backend.py` verifies the rejection behavior.
+`Region_RWMA` is an input echo finding only. It is labelled “clinical hint, not
+anatomical evidence” and is never mapped as a lesion.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  UI[React dashboard] --> API[FastAPI service]
-  API --> Schema[Feature schema]
-  API --> Risk[Risk engine]
-  API --> Explain[Explanation response]
-  Dataset[(Local dataset)] --> ML[Training workspace]
-  ML --> Artifacts[(Model artifacts)]
+  UI[React + Three.js dashboard] --> API[FastAPI]
+  API --> Schema[feature_schema.json]
+  API --> Registry[trained model registry]
+  API --> Explain[SHAP and what-if helpers]
+  Dataset[(local UCI data)] --> ML[leakage-safe CV training]
+  ML --> Artifacts[(models, metrics, samples)]
   Artifacts --> API
 ```
 
-## Tests
+## Tests and QA
 
 ```powershell
-.\.venv\Scripts\activate
-pytest
-```
-
-Frontend build:
-
-```powershell
+.\.venv\Scripts\python.exe -m pytest -q
 cd frontend
 npm run build
+npm audit
 ```
 
-Current checks:
+Current results and remaining manual checks are recorded in
+[`docs/TESTING.md`](./docs/TESTING.md).
 
-- API health check
-- prediction smoke test
-- direct leakage rejection
-- HTTP leakage rejection
-- frontend production build
+## Limitations and ethics
 
-## Limitations
+- Only 303 rows from one centre; no external validation or prospective study.
+- Vessel-level CV scores are modest, particularly for LCX and RCA.
+- Bootstrap-model ranges describe model variation, not patient-level clinical
+  uncertainty.
+- RWMA is not a spatial lesion map; angiographic stenosis is not inferred from
+  the visualization itself.
+- Explanations and counterfactuals are educational, not causal or prescriptive.
+- Not for diagnosis, treatment decisions, or clinical use.
 
-- The current dashboard uses the included risk engine until dataset-trained
-  models are added.
-- Validation metrics are populated only after local model training.
-- External validation is not included yet.
-- RWMA is treated as a clinical hint, not anatomical lesion evidence.
-- This project is not a medical device.
+## Extend the project
 
-## Submission checklist
+- Add or alter input metadata in `ml/preprocess.py` and regenerate
+  `models/feature_schema.json`.
+- Add an estimator in the training model factory and retrain with
+  `python -m ml.run_all`.
+- Add a vessel to `frontend/src/config/arteries.js`.
 
-- Add the dataset locally in `data/`.
-- Complete model training and save final artifacts in `models/`.
-- Regenerate final metrics and figures.
-- Capture screenshots.
-- Export the report as PDF.
-- Record a 3-10 minute walkthrough video.
-- Deploy backend and frontend.
-- Verify all links in a private browser window.
+## Submission status
+
+See [`docs/SUBMISSION_CHECKLIST.md`](./docs/SUBMISSION_CHECKLIST.md) for the
+remaining owner-operated tasks. Deployment, screenshots, PDF export, video
+recording/upload, GitHub publication, and hackathon submission are not included
+in this workspace completion.

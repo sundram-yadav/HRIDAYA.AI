@@ -1,0 +1,353 @@
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Html, OrbitControls, useGLTF } from '@react-three/drei';
+import * as THREE from 'three';
+import { ARTERIES } from './config/arteries';
+
+function riskColor(p = 0) {
+  const t = Math.min(1, Math.max(0, p));
+  if (t < 0.5) {
+    return new THREE.Color('#2f9f72').lerp(new THREE.Color('#d8a63a'), t / 0.5);
+  }
+  return new THREE.Color('#d8a63a').lerp(new THREE.Color('#d94b4b'), (t - 0.5) / 0.5);
+}
+
+function variableTubeGeometry(curve, tubularSegments, radialSegments, radiusFn) {
+  const frames = curve.computeFrenetFrames(tubularSegments, false);
+  const positions = [];
+  const normals = [];
+  const uvs = [];
+  const indices = [];
+  for (let i = 0; i <= tubularSegments; i += 1) {
+    const u = i / tubularSegments;
+    const p = curve.getPointAt(u);
+    const N = frames.normals[i];
+    const B = frames.binormals[i];
+    const radius = radiusFn(u);
+    for (let j = 0; j <= radialSegments; j += 1) {
+      const v = (j / radialSegments) * Math.PI * 2;
+      const sin = Math.sin(v);
+      const cos = Math.cos(v);
+      const cx = -radius * (cos * N.x + sin * B.x);
+      const cy = -radius * (cos * N.y + sin * B.y);
+      const cz = -radius * (cos * N.z + sin * B.z);
+      positions.push(p.x + cx, p.y + cy, p.z + cz);
+      const nx = cx;
+      const ny = cy;
+      const nz = cz;
+      const len = Math.hypot(nx, ny, nz) || 1;
+      normals.push(nx / len, ny / len, nz / len);
+      uvs.push(u, j / radialSegments);
+    }
+  }
+  for (let i = 0; i < tubularSegments; i += 1) {
+    for (let j = 0; j < radialSegments; j += 1) {
+      const a = i * (radialSegments + 1) + j;
+      const b = a + radialSegments + 1;
+      indices.push(a, b, a + 1, b, b + 1, a + 1);
+    }
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setIndex(indices);
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  return geo;
+}
+
+function makeHeartGeometry() {
+  const geo = new THREE.SphereGeometry(0.78, 28, 22);
+  const pos = geo.attributes.position;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i += 1) {
+    v.fromBufferAttribute(pos, i);
+    const x = v.x;
+    const y = v.y;
+    const z = v.z;
+    const bulge = 0.18 * Math.exp(-((x - 0.22) ** 2 + (y - 0.28) ** 2) / 0.22);
+    const bulgeL = 0.2 * Math.exp(-((x + 0.24) ** 2 + (y - 0.26) ** 2) / 0.2);
+    const waist = 1 + 0.12 * Math.sin((y + 0.2) * 1.6);
+    const tip = y < -0.15 ? 1 + (-0.15 - y) * 0.35 : 1;
+    v.x *= waist * 0.86;
+    v.z *= waist * 0.78;
+    v.y = v.y * 1.12 * tip + 0.04;
+    v.x += Math.sign(x || 1) * (bulge + bulgeL) * 0.35;
+    v.y += bulge + bulgeL * 0.8;
+    pos.setXYZ(i, v.x, v.y, v.z);
+  }
+  geo.computeVertexNormals();
+  return geo;
+}
+
+function GlbHeart({ url }) {
+  const gltf = useGLTF(url);
+  const scene = useMemo(() => {
+    const cloned = gltf.scene.clone(true);
+    const box = new THREE.Box3().setFromObject(cloned);
+    const size = box.getSize(new THREE.Vector3()).length() || 1;
+    const center = box.getCenter(new THREE.Vector3());
+    cloned.position.sub(center);
+    cloned.scale.setScalar(1.7 / size);
+    cloned.traverse((obj) => {
+      if (obj.isMesh) {
+        obj.material = new THREE.MeshStandardMaterial({
+          color: '#9b2c3c',
+          transparent: true,
+          opacity: 0.42,
+          roughness: 0.55,
+          metalness: 0.05,
+        });
+      }
+    });
+    return cloned;
+  }, [gltf]);
+  return <primitive object={scene} />;
+}
+
+function ProceduralHeart() {
+  const geo = useMemo(() => makeHeartGeometry(), []);
+  return (
+    <mesh geometry={geo} renderOrder={0}>
+      <meshStandardMaterial
+        color="#8c2f3d"
+        transparent
+        opacity={0.38}
+        roughness={0.48}
+        metalness={0.04}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
+
+function HeartBody() {
+  const [modelUrl, setModelUrl] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl = null;
+    fetch('/models/heart.glb')
+      .then(async (response) => {
+        if (response.status === 404 || (response.headers.get('content-type') || '').includes('text/html')) {
+          return null;
+        }
+        if (!response.ok) {
+          throw new Error(`Optional heart model request failed (${response.status})`);
+        }
+        const blob = await response.blob();
+        if ((await blob.slice(0, 4).text()) !== 'glTF') {
+          console.warn('Optional heart model is not a valid GLB; using the procedural heart.');
+          return null;
+        }
+        objectUrl = URL.createObjectURL(blob);
+        return objectUrl;
+      })
+      .then((url) => {
+        if (cancelled) {
+          if (url) URL.revokeObjectURL(url);
+          return;
+        }
+        setModelUrl(url);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          console.error('Could not load the optional heart model; using the procedural heart.', error);
+          setModelUrl(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, []);
+  if (modelUrl) {
+    return (
+      <Suspense fallback={<ProceduralHeart />}>
+        <GlbHeart url={modelUrl} />
+      </Suspense>
+    );
+  }
+  return <ProceduralHeart />;
+}
+
+function Artery({ spec, probability = 0.2, selected, hovered, onHover, onSelect }) {
+  const color = riskColor(probability);
+  const curve = useMemo(
+    () => new THREE.CatmullRomCurve3(spec.points.map((p) => new THREE.Vector3(...p))),
+    [spec],
+  );
+  const stenosisT = spec.stenosisT ?? 0.5;
+  const geo = useMemo(() => {
+    const radiusFn = (u) => {
+      const base = 0.028 + (1 - probability) * 0.012;
+      const dip = Math.exp(-((u - stenosisT) ** 2) / 0.012) * probability * 0.018;
+      return Math.max(0.008, base - dip);
+    };
+    return variableTubeGeometry(curve, 48, 8, radiusFn);
+  }, [curve, probability, stenosisT]);
+  const branchGeos = useMemo(
+    () =>
+      (spec.branches || []).map((pts) => {
+        const c = new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(...p)));
+        return new THREE.TubeGeometry(c, 16, 0.01, 6, false);
+      }),
+    [spec],
+  );
+  const glow = probability >= 0.7;
+  const mid = curve.getPointAt(0.55);
+  return (
+    <group>
+      <mesh
+        geometry={geo}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHover(spec.id);
+        }}
+        onPointerOut={() => onHover(null)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect(spec.id);
+        }}
+      >
+        <meshStandardMaterial
+          color={hovered || selected ? '#ffffff' : color}
+          emissive={glow ? color : '#000000'}
+          emissiveIntensity={glow ? 0.45 : hovered ? 0.2 : 0}
+          roughness={0.35}
+          metalness={0.15}
+        />
+      </mesh>
+      {branchGeos.map((g, i) => (
+        <mesh key={i} geometry={g}>
+          <meshStandardMaterial color={color} roughness={0.4} />
+        </mesh>
+      ))}
+      <Html position={[mid.x, mid.y + 0.08, mid.z]} center distanceFactor={2} style={{ pointerEvents: 'none' }}>
+        <div className={`callout ${selected ? 'active' : ''}`}>
+          <span className="calloutIcon">{spec.icon}</span>
+          {spec.label} {Math.round(probability * 100)}%
+        </div>
+      </Html>
+    </group>
+  );
+}
+
+function CameraRig({ focusId, controlsRef }) {
+  const { camera } = useThree();
+  const target = useMemo(() => {
+    const spec = ARTERIES.find((a) => a.id === focusId);
+    if (!spec) return new THREE.Vector3(0, 0.1, 0);
+    const curve = new THREE.CatmullRomCurve3(spec.points.map((p) => new THREE.Vector3(...p)));
+    return curve.getPointAt(0.55);
+  }, [focusId]);
+  useFrame((_, dt) => {
+    if (!focusId) return;
+    const desired = target.clone().add(new THREE.Vector3(1.2, 0.75, 2.0));
+    camera.position.lerp(desired, 1 - Math.exp(-2.2 * dt));
+    controlsRef.current?.target.lerp(target, 1 - Math.exp(-2.2 * dt));
+  });
+  return null;
+}
+
+function PulseGroup({ pulseRate, enabled, children }) {
+  const ref = useRef();
+  useFrame(({ clock }) => {
+    if (!ref.current) return;
+    if (!enabled) {
+      ref.current.scale.setScalar(1);
+      return;
+    }
+    const bpm = Math.max(40, Math.min(140, Number(pulseRate) || 76));
+    const s = 1 + 0.018 * Math.sin(clock.elapsedTime * (bpm / 60) * Math.PI * 2);
+    ref.current.scale.setScalar(s);
+  });
+  return <group ref={ref}>{children}</group>;
+}
+
+export function HeartScene({
+  prediction,
+  selected,
+  onSelect,
+  pulseRate = 76,
+  pulseOn = true,
+  autoRotate = false,
+}) {
+  const controlsRef = useRef();
+  const [hovered, setHovered] = useState(null);
+  const [focusId, setFocusId] = useState(null);
+
+  function select(id) {
+    onSelect(id);
+    setFocusId(id);
+  }
+
+  useEffect(() => {
+    setFocusId(selected === 'cad' ? null : selected);
+  }, [selected]);
+
+  return (
+    <div className="heartStage">
+      <div className="sceneTitle">3D coronary risk map</div>
+      <Canvas
+        dpr={[1, 1.5]}
+        camera={{ position: [0.2, 0.35, 2.6], fov: 42 }}
+        gl={{ antialias: true, powerPreference: 'low-power', alpha: true }}
+        onCreated={({ gl }) => {
+          gl.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        }}
+      >
+        <color attach="background" args={['#07131a']} />
+        <ambientLight intensity={0.7} />
+        <directionalLight position={[2.2, 2.4, 2]} intensity={1.05} />
+        <directionalLight position={[-2, 0.4, -1]} intensity={0.35} />
+        <PulseGroup pulseRate={pulseRate} enabled={pulseOn}>
+          <HeartBody />
+          {ARTERIES.map((spec) => (
+            <Artery
+              key={spec.id}
+              spec={spec}
+              probability={prediction?.targets?.[spec.id]?.probability || 0.15}
+              selected={selected === spec.id}
+              hovered={hovered === spec.id}
+              onHover={setHovered}
+              onSelect={select}
+            />
+          ))}
+        </PulseGroup>
+        <CameraRig focusId={focusId} controlsRef={controlsRef} />
+        <OrbitControls
+          ref={controlsRef}
+          enableDamping
+          dampingFactor={0.08}
+          autoRotate={autoRotate}
+          autoRotateSpeed={1.1}
+          minDistance={1.4}
+          maxDistance={5}
+        />
+      </Canvas>
+      {hovered && (
+        <div className="tooltip">
+          {ARTERIES.find((a) => a.id === hovered)?.fullName}:{' '}
+          {Math.round((prediction?.targets?.[hovered]?.probability || 0) * 100)}% stenosis probability
+        </div>
+      )}
+      <div className="sceneActions">
+        <button
+          type="button"
+          onClick={() => {
+            setFocusId(null);
+            controlsRef.current?.reset();
+          }}
+        >
+          Reset camera
+        </button>
+        <span className="legend">
+          <i className="g" /> low <i className="y" /> mid <i className="r" /> high · narrowing = stenosis probability
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export function startGuidedRotation(setAuto) {
+  setAuto(true);
+}

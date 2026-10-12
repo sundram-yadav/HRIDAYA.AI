@@ -1,0 +1,371 @@
+{
+  "seed": 42,
+  "n_patients": 303,
+  "n_features": 56,
+  "feature_names": [
+    "Age",
+    "Weight",
+    "Length",
+    "Sex",
+    "BMI",
+    "DM",
+    "HTN",
+    "Current_Smoker",
+    "EX_Smoker",
+    "FH",
+    "Obesity",
+    "CRF",
+    "CVA",
+    "Airway_disease",
+    "Thyroid_Disease",
+    "CHF",
+    "DLP",
+    "BP",
+    "PR",
+    "Edema",
+    "Weak_Peripheral_Pulse",
+    "Lung_rales",
+    "Systolic_Murmur",
+    "Diastolic_Murmur",
+    "Typical_Chest_Pain",
+    "Dyspnea",
+    "Function_Class",
+    "Atypical",
+    "Nonanginal",
+    "LowTH_Ang",
+    "Q_Wave",
+    "St_Elevation",
+    "St_Depression",
+    "Tinversion",
+    "LVH",
+    "Poor_R_Progression",
+    "BBB",
+    "FBS",
+    "CR",
+    "TG",
+    "LDL",
+    "HDL",
+    "BUN",
+    "ESR",
+    "HB",
+    "K",
+    "Na",
+    "WBC",
+    "Lymph",
+    "Neut",
+    "PLT",
+    "EF_TTE",
+    "Region_RWMA",
+    "VHD",
+    "ldl_hdl_ratio",
+    "tg_hdl_ratio"
+  ],
+  "leakage_columns_excluded": [
+    "LAD",
+    "LCX",
+    "RCA",
+    "Cath",
+    "CAD",
+    "lad",
+    "lcx",
+    "rca",
+    "cath",
+    "cad"
+  ],
+  "targets": {
+    "cad": {
+      "chosen_model": "soft_vote",
+      "accuracy": {
+        "mean": 0.8587103825136612,
+        "std": 0.044845541112308436
+      },
+      "precision": {
+        "mean": 0.9250764221272418,
+        "std": 0.03721630170062516
+      },
+      "recall": {
+        "mean": 0.8739323467230444,
+        "std": 0.054254939229895854
+      },
+      "f1": {
+        "mean": 0.8975709494407371,
+        "std": 0.033698408415134065
+      },
+      "roc_auc": {
+        "mean": 0.9227788141331232,
+        "std": 0.03374888539097841
+      },
+      "calibration": {
+        "method": "sigmoid",
+        "brier_before": 0.10479838168934218,
+        "brier_sigmoid": 0.09319674372295447,
+        "brier_isotonic": 0.09519076279377436,
+        "brier_after": 0.09319674372295447
+      },
+      "model_comparison_auc": {
+        "logreg": {
+          "mean": 0.9190238914452321,
+          "std": 0.03439808567112592
+        },
+        "rf": {
+          "mean": 0.9202618524506349,
+          "std": 0.0378248995593554
+        },
+        "xgboost": {
+          "mean": 0.9095873923917699,
+          "std": 0.039708584626694486
+        }
+      }
+    },
+    "lad": {
+      "chosen_model": "rf",
+      "accuracy": {
+        "mean": 0.7835081967213116,
+        "std": 0.03565773361524945
+      },
+      "precision": {
+        "mean": 0.8117729296124411,
+        "std": 0.04997989054382914
+      },
+      "recall": {
+        "mean": 0.8263174603174603,
+        "std": 0.057343983934596165
+      },
+      "f1": {
+        "mean": 0.8166691380847775,
+        "std": 0.029668258991219613
+      },
+      "roc_auc": {
+        "mean": 0.849712918192918,
+        "std": 0.046490946079791685
+      },
+      "calibration": {
+        "method": "sigmoid",
+        "brier_before": 0.1712134894099755,
+        "brier_sigmoid": 0.1539254723162015,
+        "brier_isotonic": 0.1552736766024647,
+        "brier_after": 0.1539254723162015
+      },
+      "model_comparison_auc": {
+        "logreg": {
+          "mean": 0.8171573137973138,
+          "std": 0.05638258290152186
+        },
+        "rf": {
+          "mean": 0.8489113553113553,
+          "std": 0.04930769125952741
+        },
+        "xgboost": {
+          "mean": 0.8361110622710622,
+          "std": 0.0494562552073883
+        }
+      }
+    },
+    "lcx": {
+      "chosen_model": "rf",
+      "accuracy": {
+        "mean": 0.6831803278688525,
+        "std": 0.04420196477609774
+      },
+      "precision": {
+        "mean": 0.5957626484711153,
+        "std": 0.06651866806528912
+      },
+      "recall": {
+        "mean": 0.6200724637681159,
+        "std": 0.07348971792258877
+      },
+      "f1": {
+        "mean": 0.6053077112135892,
+        "std": 0.05563847265065479
+      },
+      "roc_auc": {
+        "mean": 0.7294769769769769,
+        "std": 0.056913595017612256
+      },
+      "calibration": {
+        "method": "sigmoid",
+        "brier_before": 0.21104375440491496,
+        "brier_sigmoid": 0.20659978471300877,
+        "brier_isotonic": 0.20801696863433922,
+        "brier_after": 0.20659978471300877
+      },
+      "model_comparison_auc": {
+        "logreg": {
+          "mean": 0.6558346933890412,
+          "std": 0.07278545630453412
+        },
+        "rf": {
+          "mean": 0.726961798755277,
+          "std": 0.06158946131272764
+        },
+        "xgboost": {
+          "mean": 0.7255531074552813,
+          "std": 0.05924412319488843
+        }
+      }
+    },
+    "rca": {
+      "chosen_model": "soft_vote",
+      "accuracy": {
+        "mean": 0.6726885245901638,
+        "std": 0.05680309031826067
+      },
+      "precision": {
+        "mean": 0.5636910284320991,
+        "std": 0.08462727409151734
+      },
+      "recall": {
+        "mean": 0.5984189723320159,
+        "std": 0.12555111626603935
+      },
+      "f1": {
+        "mean": 0.57509701014836,
+        "std": 0.08828819232221886
+      },
+      "roc_auc": {
+        "mean": 0.7272458520513441,
+        "std": 0.058964943999523116
+      },
+      "calibration": {
+        "method": "sigmoid",
+        "brier_before": 0.20321259588979257,
+        "brier_sigmoid": 0.20486711835798063,
+        "brier_isotonic": 0.20902390658173128,
+        "brier_after": 0.20486711835798063
+      },
+      "model_comparison_auc": {
+        "logreg": {
+          "mean": 0.7112337863138778,
+          "std": 0.05595648458819276
+        },
+        "rf": {
+          "mean": 0.7115702888242934,
+          "std": 0.0571493352118192
+        },
+        "xgboost": {
+          "mean": 0.7165522127078192,
+          "std": 0.0599237019531463
+        }
+      }
+    }
+  },
+  "boost_ablation_auc": {
+    "cad": {
+      "baseline_class_weight": {
+        "mean": 0.9220712597935581,
+        "std": 0.03984146176363079
+      },
+      "selectk25": {
+        "mean": 0.9230150340615457,
+        "std": 0.041100142001996125
+      },
+      "random_oversample": {
+        "mean": 0.92562319501444,
+        "std": 0.039672637258331304
+      },
+      "soft_vote": {
+        "mean": 0.9282987190647928,
+        "std": 0.030151707744118822
+      }
+    },
+    "lad": {
+      "baseline_class_weight": {
+        "mean": 0.8508910866910867,
+        "std": 0.04700448736467846
+      },
+      "selectk25": {
+        "mean": 0.8535704517704519,
+        "std": 0.049839708079199886
+      },
+      "random_oversample": {
+        "mean": 0.8570227106227106,
+        "std": 0.05197207661227858
+      },
+      "soft_vote": {
+        "mean": 0.84209768009768,
+        "std": 0.05056701113318502
+      }
+    },
+    "lcx": {
+      "baseline_class_weight": {
+        "mean": 0.7365954269486878,
+        "std": 0.0777949341204419
+      },
+      "selectk25": {
+        "mean": 0.7021216869042954,
+        "std": 0.06881376468772067
+      },
+      "random_oversample": {
+        "mean": 0.7231640607999305,
+        "std": 0.06636966298576201
+      },
+      "soft_vote": {
+        "mean": 0.702154192235714,
+        "std": 0.05754276656546713
+      }
+    },
+    "rca": {
+      "baseline_class_weight": {
+        "mean": 0.7221872382055448,
+        "std": 0.07326627862150303
+      },
+      "selectk25": {
+        "mean": 0.7054744207490202,
+        "std": 0.06461190726246299
+      },
+      "random_oversample": {
+        "mean": 0.7163615560640731,
+        "std": 0.07044026503282746
+      },
+      "soft_vote": {
+        "mean": 0.7300575174717052,
+        "std": 0.06248237260756684
+      }
+    }
+  },
+  "vessel_classifier_chain": {
+    "lad": {
+      "independent_auc_mean": 0.8000380952380952,
+      "chain_auc_mean": 0.8210844932844934,
+      "delta": 0.021046398046398185
+    },
+    "lcx": {
+      "independent_auc_mean": 0.6683924620847131,
+      "chain_auc_mean": 0.692051222909069,
+      "delta": 0.023658760824355807
+    },
+    "rca": {
+      "independent_auc_mean": 0.6821824380602916,
+      "chain_auc_mean": 0.7284743280717528,
+      "delta": 0.04629189001146128
+    },
+    "helps": true,
+    "note": "Classifier-chain uses other vessel labels only as training outputs, never as input features from angiography. Test-time chain features are predicted, not ground truth."
+  },
+  "notes": [
+    "Metrics are mean \u00b1 std over repeated stratified 5-fold CV (5 repeats) unless a table says otherwise.",
+    "Hyperparameters were chosen with an inner 3-fold search on training folds only.",
+    "Engineered features (LDL/HDL, TG/HDL) are derived from labs, not from vessel labels.",
+    "No external validation. 303 single-centre rows. Not for clinical use."
+  ],
+  "figures": [
+    "roc_cad.png",
+    "roc_lad.png",
+    "roc_lcx.png",
+    "roc_rca.png",
+    "cm_cad.png",
+    "cm_lad.png",
+    "cm_lcx.png",
+    "cm_rca.png",
+    "cal_cad.png",
+    "cal_lad.png",
+    "cal_lcx.png",
+    "cal_rca.png",
+    "shap_cad.png",
+    "shap_lad.png",
+    "shap_lcx.png",
+    "shap_rca.png",
+    "model_comparison.png"
+  ]
+}

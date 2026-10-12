@@ -15,13 +15,13 @@ dist/
 .env.*
 !.env.example
 
-# Data and generated model artifacts
+# Raw dataset stays local (UCI license / size). Trained artifacts are committed
+# so the demo runs without retraining.
 data/*
 !data/.gitkeep
-models/*
-!models/.gitkeep
-docs/figures/*
-!docs/figures/.gitkeep
+models/*.xlsx
+models/*_bundle.joblib
+# Track the compressed runtime registry; individual bundles duplicate its models.
 
 # OS/editor
 .DS_Store
