@@ -9,17 +9,15 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.14.0
+      - key: ALLOWED_ORIGIN
+        value: https://hridaya-ai-web.onrender.com
 
-  - type: static
+  - type: web
     name: hridaya-ai-web
+    runtime: static
     rootDir: frontend
     buildCommand: npm ci && npm run build
-    publishPath: dist
+    staticPublishPath: dist
     envVars:
-      - key: SKIP_INSTALL_DEPS
-        value: "true"
-      - key: VITE_API_HOST
-        fromService:
-          type: web
-          name: hridaya-ai-api
-          property: host
+      - key: VITE_API_URL
+        value: https://hridaya-ai-api.onrender.com
