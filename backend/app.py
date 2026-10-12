@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import threading
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Literal
@@ -22,6 +23,9 @@ from ml.predict import (
 ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs" / "figures"
 
+ART: dict | None = None
+_LOAD_LOCK = threading.Lock()
+
 
 def _normalize_origin(origin: str) -> str:
     normalized = origin.strip().rstrip("/")
@@ -30,13 +34,25 @@ def _normalize_origin(origin: str) -> str:
     return normalized
 
 
-@asynccontextmanager
-async def lifespan(_app: FastAPI):
+def _load_in_background() -> None:
+    """Warm the model registry without blocking server startup.
+
+    The port opens immediately (Render needs this); the heavy joblib/SHAP
+    load happens here. The lock stops a request from loading a second copy.
+    """
     global ART
     try:
-        ART = load_artifacts()
-    except FileNotFoundError:
-        ART = None
+        with _LOAD_LOCK:
+            if ART is None:
+                ART = load_artifacts()
+    except Exception:
+        # A failure here is retried on the first request via artifacts().
+        pass
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    threading.Thread(target=_load_in_background, daemon=True).start()
     yield
 
 
@@ -68,7 +84,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-ART: dict | None = None
 TargetName = Literal["cad", "lad", "lcx", "rca"]
 
 
@@ -89,10 +104,12 @@ class CounterfactualRequest(BaseModel):
 def artifacts() -> dict:
     global ART
     if ART is None:
-        try:
-            ART = load_artifacts()
-        except FileNotFoundError as exc:
-            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        with _LOAD_LOCK:
+            if ART is None:
+                try:
+                    ART = load_artifacts()
+                except FileNotFoundError as exc:
+                    raise HTTPException(status_code=503, detail=str(exc)) from exc
     return ART
 
 
