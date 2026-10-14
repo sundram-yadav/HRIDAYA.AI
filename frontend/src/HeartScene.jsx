@@ -1,8 +1,30 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Component, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Html, OrbitControls, useGLTF } from '@react-three/drei';
+import { ContactShadows, Environment, Html, Lightformer, OrbitControls, useGLTF, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
 import { ARTERIES } from './config/arteries';
+
+/**
+ * 3D heart model location.
+ * Put your .glb at  frontend/public/models/heart.glb
+ * (or point VITE_HEART_MODEL_URL in frontend/.env to another path / URL).
+ */
+const MODEL_URL = import.meta.env.VITE_HEART_MODEL_URL || `${import.meta.env.BASE_URL}models/heart.glb`;
+
+/** Height (scene units) the supplied model is normalised to. The artery overlay is authored for ~1.5. */
+const MODEL_HEIGHT = 1.5;
+
+/**
+ * The artery overlay was authored with the left/right axis mirrored relative to the supplied
+ * anatomical model (apex toward +X as seen from the front). Mirror X and nudge the overlay slightly
+ * forward so it sits in front of the cut-away surface. Data in config/arteries.js is untouched.
+ */
+const fit = ([x, y, z]) => [-x, y, z + 0.08];
+const FITTED_ARTERIES = ARTERIES.map((a) => ({
+  ...a,
+  points: a.points.map(fit),
+  branches: (a.branches || []).map((b) => b.map(fit)),
+}));
 
 function riskColor(p = 0) {
   const t = Math.min(1, Math.max(0, p));
@@ -32,11 +54,8 @@ function variableTubeGeometry(curve, tubularSegments, radialSegments, radiusFn) 
       const cy = -radius * (cos * N.y + sin * B.y);
       const cz = -radius * (cos * N.z + sin * B.z);
       positions.push(p.x + cx, p.y + cy, p.z + cz);
-      const nx = cx;
-      const ny = cy;
-      const nz = cz;
-      const len = Math.hypot(nx, ny, nz) || 1;
-      normals.push(nx / len, ny / len, nz / len);
+      const len = Math.hypot(cx, cy, cz) || 1;
+      normals.push(cx / len, cy / len, cz / len);
       uvs.push(u, j / radialSegments);
     }
   }
@@ -63,7 +82,6 @@ function makeHeartGeometry() {
     v.fromBufferAttribute(pos, i);
     const x = v.x;
     const y = v.y;
-    const z = v.z;
     const bulge = 0.18 * Math.exp(-((x - 0.22) ** 2 + (y - 0.28) ** 2) / 0.22);
     const bulgeL = 0.2 * Math.exp(-((x + 0.24) ** 2 + (y - 0.26) ** 2) / 0.2);
     const waist = 1 + 0.12 * Math.sin((y + 0.2) * 1.6);
@@ -79,94 +97,51 @@ function makeHeartGeometry() {
   return geo;
 }
 
+/** Supplied model: geometry, textures and materials are used exactly as exported. */
 function GlbHeart({ url }) {
   const gltf = useGLTF(url);
   const scene = useMemo(() => {
     const cloned = gltf.scene.clone(true);
     const box = new THREE.Box3().setFromObject(cloned);
-    const size = box.getSize(new THREE.Vector3()).length() || 1;
+    const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
     cloned.position.sub(center);
-    cloned.scale.setScalar(1.7 / size);
-    cloned.traverse((obj) => {
-      if (obj.isMesh) {
-        obj.material = new THREE.MeshStandardMaterial({
-          color: '#9b2c3c',
-          transparent: true,
-          opacity: 0.42,
-          roughness: 0.55,
-          metalness: 0.05,
-        });
-      }
-    });
-    return cloned;
+    const wrapper = new THREE.Group();
+    wrapper.add(cloned);
+    wrapper.scale.setScalar(MODEL_HEIGHT / (size.y || 1));
+    return wrapper;
   }, [gltf]);
   return <primitive object={scene} />;
 }
 
+/** Only used when the supplied model cannot be loaded (a notice is shown to the user). */
 function ProceduralHeart() {
   const geo = useMemo(() => makeHeartGeometry(), []);
   return (
-    <mesh geometry={geo} renderOrder={0}>
-      <meshStandardMaterial
-        color="#8c2f3d"
-        transparent
-        opacity={0.38}
-        roughness={0.48}
-        metalness={0.04}
-        depthWrite={false}
-      />
+    <mesh geometry={geo}>
+      <meshStandardMaterial color="#b03a52" transparent opacity={0.5} roughness={0.48} metalness={0.04} depthWrite={false} />
     </mesh>
   );
 }
 
-function HeartBody() {
-  const [modelUrl, setModelUrl] = useState(null);
-  useEffect(() => {
-    let cancelled = false;
-    let objectUrl = null;
-    fetch('/models/heart.glb')
-      .then(async (response) => {
-        if (response.status === 404 || (response.headers.get('content-type') || '').includes('text/html')) {
-          return null;
-        }
-        if (!response.ok) {
-          throw new Error(`Optional heart model request failed (${response.status})`);
-        }
-        const blob = await response.blob();
-        if ((await blob.slice(0, 4).text()) !== 'glTF') {
-          console.warn('Optional heart model is not a valid GLB; using the procedural heart.');
-          return null;
-        }
-        objectUrl = URL.createObjectURL(blob);
-        return objectUrl;
-      })
-      .then((url) => {
-        if (cancelled) {
-          if (url) URL.revokeObjectURL(url);
-          return;
-        }
-        setModelUrl(url);
-      })
-      .catch((error) => {
-        if (!cancelled) {
-          console.error('Could not load the optional heart model; using the procedural heart.', error);
-          setModelUrl(null);
-        }
-      });
-    return () => {
-      cancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, []);
-  if (modelUrl) {
-    return (
-      <Suspense fallback={<ProceduralHeart />}>
-        <GlbHeart url={modelUrl} />
-      </Suspense>
-    );
+class SceneErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { failed: false };
   }
-  return <ProceduralHeart />;
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error) {
+    console.error(this.props.label || '3D scene error:', error);
+    this.props.onError?.(error);
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
 }
 
 function Artery({ spec, probability = 0.2, selected, hovered, onHover, onSelect }) {
@@ -191,6 +166,13 @@ function Artery({ spec, probability = 0.2, selected, hovered, onHover, onSelect 
         return new THREE.TubeGeometry(c, 16, 0.01, 6, false);
       }),
     [spec],
+  );
+  useEffect(
+    () => () => {
+      geo.dispose();
+      branchGeos.forEach((g) => g.dispose());
+    },
+    [geo, branchGeos],
   );
   const glow = probability >= 0.7;
   const mid = curve.getPointAt(0.55);
@@ -234,14 +216,14 @@ function Artery({ spec, probability = 0.2, selected, hovered, onHover, onSelect 
 function CameraRig({ focusId, controlsRef }) {
   const { camera } = useThree();
   const target = useMemo(() => {
-    const spec = ARTERIES.find((a) => a.id === focusId);
-    if (!spec) return new THREE.Vector3(0, 0.1, 0);
+    const spec = FITTED_ARTERIES.find((a) => a.id === focusId);
+    if (!spec) return new THREE.Vector3(0, 0, 0);
     const curve = new THREE.CatmullRomCurve3(spec.points.map((p) => new THREE.Vector3(...p)));
     return curve.getPointAt(0.55);
   }, [focusId]);
   useFrame((_, dt) => {
     if (!focusId) return;
-    const desired = target.clone().add(new THREE.Vector3(1.2, 0.75, 2.0));
+    const desired = target.clone().add(new THREE.Vector3(0.9, 0.6, 1.9));
     camera.position.lerp(desired, 1 - Math.exp(-2.2 * dt));
     controlsRef.current?.target.lerp(target, 1 - Math.exp(-2.2 * dt));
   });
@@ -263,6 +245,32 @@ function PulseGroup({ pulseRate, enabled, children }) {
   return <group ref={ref}>{children}</group>;
 }
 
+/** Soft studio lighting generated in code (no network / HDR download needed). */
+function Studio() {
+  return (
+    <Environment resolution={256} frames={1}>
+      <Lightformer form="rect" intensity={2.2} position={[0, 4, 3]} scale={[8, 3, 1]} color="#ffffff" />
+      <Lightformer form="rect" intensity={1.2} position={[-4, 1, 2]} scale={[3, 5, 1]} color="#ffe3ea" />
+      <Lightformer form="rect" intensity={1.0} position={[4, 0.5, -2]} scale={[3, 5, 1]} color="#e6dcff" />
+      <Lightformer form="ring" intensity={1.4} position={[0, -3, 2]} scale={4} color="#fff2e6" />
+    </Environment>
+  );
+}
+
+function LoadingOverlay() {
+  const { active, progress } = useProgress();
+  if (!active) return null;
+  return (
+    <div className="sceneLoading" role="status" aria-live="polite">
+      <div className="loadHeart" aria-hidden="true">♥</div>
+      <div className="loadBar">
+        <i style={{ width: `${Math.max(6, Math.round(progress))}%` }} />
+      </div>
+      <span>Loading 3D heart… {Math.round(progress)}%</span>
+    </div>
+  );
+}
+
 export function HeartScene({
   prediction,
   selected,
@@ -272,8 +280,11 @@ export function HeartScene({
   autoRotate = false,
 }) {
   const controlsRef = useRef();
+  const stageRef = useRef();
   const [hovered, setHovered] = useState(null);
   const [focusId, setFocusId] = useState(null);
+  const [modelFailed, setModelFailed] = useState(false);
+  const [visible, setVisible] = useState(true);
 
   function select(id) {
     onSelect(id);
@@ -284,46 +295,84 @@ export function HeartScene({
     setFocusId(selected === 'cad' ? null : selected);
   }, [selected]);
 
+  // Pause rendering while the stage is scrolled out of view (saves GPU/battery).
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined;
+    const io = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0.05 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
-    <div className="heartStage">
+    <div className="heartStage" ref={stageRef}>
+      <div className="stageGlow" aria-hidden="true" />
       <div className="sceneTitle">3D coronary risk map</div>
-      <Canvas
-        dpr={[1, 1.5]}
-        camera={{ position: [0.2, 0.35, 2.6], fov: 42 }}
-        gl={{ antialias: true, powerPreference: 'low-power', alpha: true }}
-        onCreated={({ gl }) => {
-          gl.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-        }}
+      <div className="sceneHint" aria-hidden="true">Drag to rotate · Scroll / pinch to zoom</div>
+
+      <SceneErrorBoundary
+        label="3D view could not start:"
+        fallback={<div className="sceneFallback">3D view is not available on this device or browser (WebGL could not start).</div>}
       >
-        <color attach="background" args={['#07131a']} />
-        <ambientLight intensity={0.7} />
-        <directionalLight position={[2.2, 2.4, 2]} intensity={1.05} />
-        <directionalLight position={[-2, 0.4, -1]} intensity={0.35} />
-        <PulseGroup pulseRate={pulseRate} enabled={pulseOn}>
-          <HeartBody />
-          {ARTERIES.map((spec) => (
-            <Artery
-              key={spec.id}
-              spec={spec}
-              probability={prediction?.targets?.[spec.id]?.probability || 0.15}
-              selected={selected === spec.id}
-              hovered={hovered === spec.id}
-              onHover={setHovered}
-              onSelect={select}
-            />
-          ))}
-        </PulseGroup>
-        <CameraRig focusId={focusId} controlsRef={controlsRef} />
-        <OrbitControls
-          ref={controlsRef}
-          enableDamping
-          dampingFactor={0.08}
-          autoRotate={autoRotate}
-          autoRotateSpeed={1.1}
-          minDistance={1.4}
-          maxDistance={5}
-        />
-      </Canvas>
+        <Canvas
+          dpr={[1, 1.5]}
+          frameloop={visible ? 'always' : 'never'}
+          camera={{ position: [0.2, 0.25, 3.0], fov: 40 }}
+          gl={{ antialias: true, powerPreference: 'high-performance', alpha: true }}
+          style={{ background: 'transparent' }}
+        >
+          <ambientLight intensity={0.55} />
+          <directionalLight position={[2.2, 2.6, 2.4]} intensity={1.1} />
+          <directionalLight position={[-2.4, 0.6, -1.6]} intensity={0.4} color="#ffd9e2" />
+          <Suspense fallback={null}>
+            <Studio />
+          </Suspense>
+          <PulseGroup pulseRate={pulseRate} enabled={pulseOn}>
+            <SceneErrorBoundary
+              label="Heart model failed to load:"
+              onError={() => setModelFailed(true)}
+              fallback={<ProceduralHeart />}
+            >
+              <Suspense fallback={null}>
+                <GlbHeart url={MODEL_URL} />
+              </Suspense>
+            </SceneErrorBoundary>
+            {FITTED_ARTERIES.map((spec) => (
+              <Artery
+                key={spec.id}
+                spec={spec}
+                probability={prediction?.targets?.[spec.id]?.probability || 0.15}
+                selected={selected === spec.id}
+                hovered={hovered === spec.id}
+                onHover={setHovered}
+                onSelect={select}
+              />
+            ))}
+          </PulseGroup>
+          <ContactShadows position={[0, -0.92, 0]} opacity={0.28} scale={4.2} blur={2.8} far={1.6} frames={1} color="#6b2a45" />
+          <CameraRig focusId={focusId} controlsRef={controlsRef} />
+          <OrbitControls
+            ref={controlsRef}
+            enableDamping
+            dampingFactor={0.08}
+            enablePan={false}
+            autoRotate={autoRotate}
+            autoRotateSpeed={1.1}
+            minDistance={1.4}
+            maxDistance={5}
+            onStart={() => setFocusId(null)}
+          />
+        </Canvas>
+      </SceneErrorBoundary>
+
+      <LoadingOverlay />
+
+      {modelFailed && (
+        <div className="sceneNotice" role="alert">
+          Heart model not found at <code>public/models/heart.glb</code> — showing a simplified placeholder.
+        </div>
+      )}
+
       {hovered && (
         <div className="tooltip">
           {ARTERIES.find((a) => a.id === hovered)?.fullName}:{' '}

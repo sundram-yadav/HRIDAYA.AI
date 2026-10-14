@@ -30,6 +30,12 @@ function fmtPct(p) {
   return `${Math.round(p * 100)}%`;
 }
 
+function toneOf(p) {
+  if (p >= 0.66) return 'high';
+  if (p >= 0.33) return 'mid';
+  return 'low';
+}
+
 function meanStd(obj) {
   if (!obj) return '—';
   if (typeof obj.mean === 'number') return `${obj.mean.toFixed(3)} ± ${obj.std.toFixed(3)}`;
@@ -39,7 +45,7 @@ function meanStd(obj) {
 export default function App() {
   const [lang, setLang] = useState('en');
   const [plain, setPlain] = useState(false);
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
   const [tab, setTab] = useState('live');
   const [schema, setSchema] = useState([]);
   const [samples, setSamples] = useState([]);
@@ -221,8 +227,12 @@ export default function App() {
   if (busy) {
     return (
       <main className="loading">
-        <div className="skeleton title" />
-        <p>{waking ? t.waking : 'Loading HRIDAYA.AI…'}</p>
+        <div className="bgFx" aria-hidden="true" />
+        <div className="loadingCard glass">
+          <div className="loadHeart big" aria-hidden="true">♥</div>
+          <div className="skeleton title" />
+          <p>{waking ? t.waking : 'Loading HRIDAYA.AI…'}</p>
+        </div>
       </main>
     );
   }
@@ -237,196 +247,240 @@ export default function App() {
       )
     : null;
 
+  const [headFirst, ...headRest] = String(t.brandSub).split(' ');
+
   return (
-    <main>
-      <header className="topbar">
-        <div>
-          <span className="brand">HRIDAYA.AI</span>
-          <p>{t.brandSub}</p>
-        </div>
-        <div className="topActions">
-          <button type="button" className="ghost" onClick={() => setPlain((v) => !v)}>
-            {plain ? t.clinician : t.plain}
-          </button>
-          <button type="button" className="ghost" onClick={() => setLang((v) => (v === 'en' ? 'hi' : 'en'))}>
-            {t.hindi}
-          </button>
-          <button type="button" className="ghost" onClick={() => setTheme((v) => (v === 'dark' ? 'light' : 'dark'))}>
-            {theme === 'dark' ? 'Light' : 'Dark'}
-          </button>
-        </div>
-      </header>
+    <main className="app">
+      <div className="bgFx" aria-hidden="true">
+        <i className="blob b1" />
+        <i className="blob b2" />
+        <i className="blob b3" />
+        <i className="blob b4" />
+      </div>
+      <div className="grain" aria-hidden="true" />
 
-      <section className="disclaimer" role="note">
-        <strong>Disclaimer.</strong> {DISCLAIMER}
-      </section>
+      <div className="page">
+        <header className="topbar glass">
+          <div className="brandWrap">
+            <span className="brandMark" aria-hidden="true">♥</span>
+            <span className="brand">HRIDAYA<b>.AI</b></span>
+          </div>
+          <div className="topActions">
+            <button type="button" className="ghost" onClick={() => setPlain((v) => !v)}>
+              {plain ? t.clinician : t.plain}
+            </button>
+            <button type="button" className="ghost" onClick={() => setLang((v) => (v === 'en' ? 'hi' : 'en'))}>
+              {t.hindi}
+            </button>
+            <button type="button" className="ghost" onClick={() => setTheme((v) => (v === 'dark' ? 'light' : 'dark'))}>
+              {theme === 'dark' ? 'Light' : 'Dark'}
+            </button>
+          </div>
+        </header>
 
-      {error && (
-        <section className="error">
-          {error}
-          <button type="button" onClick={loadCore}>
-            Retry
-          </button>
-        </section>
-      )}
-      {demoCaption && <section className="demoBanner">{demoCaption}</section>}
-
-      <nav className="tabs" aria-label="Views">
-        <button type="button" className={tab === 'live' ? 'on' : ''} onClick={() => setTab('live')}>
-          Live
-        </button>
-        <button type="button" className={tab === 'metrics' ? 'on' : ''} onClick={() => setTab('metrics')}>
-          {t.metrics}
-        </button>
-      </nav>
-
-      {tab === 'live' ? (
-        <section className="shell">
-          <div className="visualPanel">
-            <HeartScene
-              prediction={prediction}
-              selected={selected}
-              onSelect={setSelected}
-              pulseRate={patient.PR}
-              pulseOn={pulseOn}
-              autoRotate={autoRotate}
-            />
-            <div className="sampleBar">
-              <select onChange={(e) => loadSample(e.target.value)} defaultValue="" aria-label={t.loadSample}>
-                <option value="" disabled>
-                  {t.loadSample}
-                </option>
-                {samples.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-              <button type="button" onClick={resetPatient}>
-                {t.reset}
-              </button>
-              <button type="button" onClick={toggleWhatIf}>
-                {baseline ? t.exitWhatIf : t.whatIf}
-              </button>
-              <button type="button" onClick={runCounterfactual}>
-                {t.suggest}
-              </button>
-              <button type="button" className="accent" onClick={startGuidedDemo}>
-                {t.guided}
-              </button>
-              <label className="toggle compact">
-                <input type="checkbox" checked={pulseOn} onChange={(e) => setPulseOn(e.target.checked)} />
-                {t.pulse}
-              </label>
+        <section className="hero">
+          <h1>
+            <span className="heroA">{headFirst}</span> <span className="heroB">{headRest.join(' ')}</span>
+          </h1>
+          <div className="ticker" aria-hidden="true">
+            <div className="tickerTrack">
+              {Array.from({ length: 2 }).map((_, k) => (
+                <span key={k}>
+                  HRIDAYA.AI <em>♥</em> CAD <em>✦</em> LAD <em>♥</em> LCX <em>✦</em> RCA <em>♥</em> HRIDAYA.AI <em>✦</em> CAD{' '}
+                  <em>♥</em> LAD <em>✦</em> LCX <em>♥</em> RCA <em>✦</em>{' '}
+                </span>
+              ))}
             </div>
           </div>
-
-          <aside className="dashboard">
-            <section className="cards">
-              {TARGETS.map(([key, copyKey]) => (
-                <RiskCard
-                  key={key}
-                  id={key}
-                  label={t[copyKey]}
-                  active={selected === key}
-                  value={prediction?.targets?.[key]}
-                  onClick={() => setSelected(key)}
-                />
-              ))}
-            </section>
-            <section className="detail">
-              <h2>{t.detail} — {t[selected]}</h2>
-              <p className="muted">
-                {plain
-                  ? 'These are the strongest factors that pushed this estimate up or down.'
-                  : 'SHAP values for this patient and target. Positive values increase predicted probability.'}
-              </p>
-              {explain?.contributions ? (
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart
-                    data={explain.contributions.map((c) => ({
-                      name: c.label,
-                      shap: c.shap,
-                    }))}
-                    layout="vertical"
-                    margin={{ left: 8, right: 12, top: 8, bottom: 8 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                    <XAxis type="number" />
-                    <YAxis type="category" dataKey="name" width={118} tick={{ fontSize: 11 }} />
-                    <Tooltip />
-                    <Bar dataKey="shap">
-                      {explain.contributions.map((c) => (
-                        <Cell key={c.feature} fill={c.shap >= 0 ? '#d94b4b' : '#2f9f72'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="skeleton chart" />
-              )}
-              <ul className="sentences">
-                {(explain?.sentences || []).map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
-              {Number(patient.Region_RWMA) > 0 && <p className="hint">{t.rwma}</p>}
-              {counterfactual && (
-                <div className="whatif">
-                  <strong>
-                    {counterfactual.disclaimer} Δ {(counterfactual.delta * 100).toFixed(1)} pp
-                  </strong>
-                  <p>
-                    Before {fmtPct(counterfactual.before)} → after {fmtPct(counterfactual.after)}
-                  </p>
-                </div>
-              )}
-              {baseline && delta && (
-                <div className="whatif" aria-live="polite">
-                  <strong>Change from baseline (percentage points)</strong>
-                  <ul>
-                    {TARGETS.map(([key]) => (
-                      <li key={key}>
-                        {t[key]}: {delta[key] == null ? '—' : `${delta[key] > 0 ? '+' : ''}${(delta[key] * 100).toFixed(1)} pp`}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="muted">Changed fields are highlighted in the form.</p>
-                </div>
-              )}
-            </section>
-          </aside>
         </section>
-      ) : (
-        <MetricsPanel metrics={metrics} t={t} />
-      )}
 
-      {tab === 'live' && (
-        <section className="formPanel">
-          <h2>{t.inputs}</h2>
-          {Object.entries(groups).map(([group, features]) => (
-            <fieldset key={group}>
-              <legend>{group}</legend>
-              <div className="fieldGrid">
-                {features.map((feature) => (
-                  <FeatureInput
-                    key={feature.name}
-                    feature={feature}
-                    value={patient[feature.name]}
-                    changed={baseline ? baseline[feature.name] !== patient[feature.name] : false}
-                    onChange={updateFeature}
+        <section className="disclaimer glass" role="note">
+          <span className="disclaimerIcon" aria-hidden="true">!</span>
+          <p>
+            <strong>Disclaimer.</strong> {DISCLAIMER}
+          </p>
+        </section>
+
+        {error && (
+          <section className="error glass" role="alert">
+            <span>{error}</span>
+            <button type="button" className="ghost" onClick={loadCore}>
+              Retry
+            </button>
+          </section>
+        )}
+        {demoCaption && <section className="demoBanner glass" aria-live="polite">{demoCaption}</section>}
+
+        <nav className="tabs glass" aria-label="Views">
+          <button type="button" className={tab === 'live' ? 'on' : ''} onClick={() => setTab('live')}>
+            Live
+          </button>
+          <button type="button" className={tab === 'metrics' ? 'on' : ''} onClick={() => setTab('metrics')}>
+            {t.metrics}
+          </button>
+        </nav>
+
+        {tab === 'live' ? (
+          <section className="shell">
+            <div className="visualPanel">
+              <HeartScene
+                prediction={prediction}
+                selected={selected}
+                onSelect={setSelected}
+                pulseRate={patient.PR}
+                pulseOn={pulseOn}
+                autoRotate={autoRotate}
+              />
+              <div className="sampleBar glass">
+                <select onChange={(e) => loadSample(e.target.value)} defaultValue="" aria-label={t.loadSample}>
+                  <option value="" disabled>
+                    {t.loadSample}
+                  </option>
+                  {samples.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+                <button type="button" onClick={resetPatient}>
+                  {t.reset}
+                </button>
+                <button type="button" onClick={toggleWhatIf}>
+                  {baseline ? t.exitWhatIf : t.whatIf}
+                </button>
+                <button type="button" onClick={runCounterfactual}>
+                  {t.suggest}
+                </button>
+                <button type="button" className="accent" onClick={startGuidedDemo}>
+                  {t.guided}
+                </button>
+                <label className="toggle compact">
+                  <input type="checkbox" checked={pulseOn} onChange={(e) => setPulseOn(e.target.checked)} />
+                  <span>{t.pulse}</span>
+                </label>
+              </div>
+            </div>
+
+            <aside className="dashboard">
+              <section className="cards">
+                {TARGETS.map(([key, copyKey]) => (
+                  <RiskCard
+                    key={key}
+                    id={key}
+                    label={t[copyKey]}
+                    active={selected === key}
+                    value={prediction?.targets?.[key]}
+                    onClick={() => setSelected(key)}
                   />
                 ))}
-              </div>
-            </fieldset>
-          ))}
-        </section>
-      )}
+              </section>
+              <section className="detail glass">
+                <h2>{t.detail} — {t[selected]}</h2>
+                <p className="muted">
+                  {plain
+                    ? 'These are the strongest factors that pushed this estimate up or down.'
+                    : 'SHAP values for this patient and target. Positive values increase predicted probability.'}
+                </p>
+                {explain?.contributions ? (
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart
+                      data={explain.contributions.map((c) => ({
+                        name: c.label,
+                        shap: c.shap,
+                      }))}
+                      layout="vertical"
+                      margin={{ left: 8, right: 12, top: 8, bottom: 8 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.25} />
+                      <XAxis type="number" />
+                      <YAxis type="category" dataKey="name" width={118} tick={{ fontSize: 11 }} />
+                      <Tooltip
+                        contentStyle={{
+                          background: 'var(--glass-strong)',
+                          border: '1px solid var(--glass-edge)',
+                          borderRadius: 12,
+                          color: 'var(--ink)',
+                          backdropFilter: 'blur(12px)',
+                        }}
+                      />
+                      <Bar dataKey="shap" radius={[0, 6, 6, 0]}>
+                        {explain.contributions.map((c) => (
+                          <Cell key={c.feature} fill={c.shap >= 0 ? '#d94b4b' : '#2f9f72'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="skeleton chart" />
+                )}
+                <ul className="sentences">
+                  {(explain?.sentences || []).map((s) => (
+                    <li key={s}>{s}</li>
+                  ))}
+                </ul>
+                {Number(patient.Region_RWMA) > 0 && <p className="hint">{t.rwma}</p>}
+                {counterfactual && (
+                  <div className="whatif">
+                    <strong>
+                      {counterfactual.disclaimer} Δ {(counterfactual.delta * 100).toFixed(1)} pp
+                    </strong>
+                    <p>
+                      Before {fmtPct(counterfactual.before)} → after {fmtPct(counterfactual.after)}
+                    </p>
+                  </div>
+                )}
+                {baseline && delta && (
+                  <div className="whatif" aria-live="polite">
+                    <strong>Change from baseline (percentage points)</strong>
+                    <ul>
+                      {TARGETS.map(([key]) => (
+                        <li key={key}>
+                          {t[key]}: {delta[key] == null ? '—' : `${delta[key] > 0 ? '+' : ''}${(delta[key] * 100).toFixed(1)} pp`}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="muted">Changed fields are highlighted in the form.</p>
+                  </div>
+                )}
+              </section>
+            </aside>
+          </section>
+        ) : (
+          <MetricsPanel metrics={metrics} t={t} />
+        )}
 
-      <footer>
-        <p>{DISCLAIMER}</p>
-        <p className="muted">{t.limitations} API {API_URL}</p>
-      </footer>
+        {tab === 'live' && (
+          <section className="formPanel glass">
+            <h2>{t.inputs}</h2>
+            <div className="groupGrid">
+              {Object.entries(groups).map(([group, features], gi) => (
+                <fieldset key={group}>
+                  <legend>
+                    <span className="legendNum" aria-hidden="true">{String(gi + 1).padStart(2, '0')}</span>
+                    {group}
+                  </legend>
+                  <div className="fieldGrid">
+                    {features.map((feature) => (
+                      <FeatureInput
+                        key={feature.name}
+                        feature={feature}
+                        value={patient[feature.name]}
+                        changed={baseline ? baseline[feature.name] !== patient[feature.name] : false}
+                        onChange={updateFeature}
+                      />
+                    ))}
+                  </div>
+                </fieldset>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <footer className="glass">
+          <p>{DISCLAIMER}</p>
+          <p className="muted">{t.limitations} API {API_URL}</p>
+        </footer>
+      </div>
     </main>
   );
 }
@@ -434,11 +488,21 @@ export default function App() {
 function RiskCard({ id, label, value, active, onClick }) {
   const p = value?.probability || 0;
   return (
-    <button type="button" className={active ? 'riskCard active' : 'riskCard'} onClick={onClick}>
-      <span>
-        {label} <em className="icon">{id === 'cad' ? '♥' : id.toUpperCase()}</em>
+    <button
+      type="button"
+      className={`${active ? 'riskCard active' : 'riskCard'} tone-${toneOf(p)}`}
+      style={{ '--p': `${Math.round(p * 100)}` }}
+      onClick={onClick}
+    >
+      <span className="riskTop">
+        <span>
+          {label} <em className="icon">{id === 'cad' ? '♥' : id.toUpperCase()}</em>
+        </span>
       </span>
-      <strong>{fmtPct(p)}</strong>
+      <span className="riskMain">
+        <span className="ring" aria-hidden="true" />
+        <strong>{fmtPct(p)}</strong>
+      </span>
       <small>{value ? `${fmtPct(value.ci_low)}–${fmtPct(value.ci_high)} CI` : 'Waiting'}</small>
       {value?.low_confidence && <em className="badge">wide CI</em>}
     </button>
@@ -477,6 +541,10 @@ function FeatureInput({ feature, value, onChange, changed }) {
       </label>
     );
   }
+  const min = Number(feature.min);
+  const max = Number(feature.max);
+  const current = Number(value ?? feature.default);
+  const fill = max > min ? Math.min(100, Math.max(0, ((current - min) / (max - min)) * 100)) : 0;
   return (
     <label className={changed ? 'changed' : ''}>
       <span>
@@ -488,6 +556,7 @@ function FeatureInput({ feature, value, onChange, changed }) {
         max={feature.max}
         step={feature.name === 'BMI' || feature.name === 'CR' ? 0.1 : 1}
         value={value ?? feature.default}
+        style={{ '--fill': `${fill}%` }}
         onChange={(e) => onChange(feature.name, Number(e.target.value))}
       />
       <strong>{value}</strong>
@@ -498,39 +567,41 @@ function FeatureInput({ feature, value, onChange, changed }) {
 function MetricsPanel({ metrics, t }) {
   const figures = metrics?.figures || [];
   return (
-    <section className="metricsPanel wide">
+    <section className="metricsPanel wide glass">
       <h2>{t.metrics}</h2>
       <p>{t.limitations}</p>
-      <table>
-        <thead>
-          <tr>
-            <th>Target</th>
-            <th>Model</th>
-            <th>ROC-AUC</th>
-            <th>F1</th>
-            <th>Recall</th>
-            <th>Accuracy</th>
-            <th>Precision</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Object.entries(metrics?.targets || {}).map(([key, row]) => (
-            <tr key={key}>
-              <td>{key.toUpperCase()}</td>
-              <td>{row.chosen_model}</td>
-              <td>{meanStd(row.roc_auc)}</td>
-              <td>{meanStd(row.f1)}</td>
-              <td>{meanStd(row.recall)}</td>
-              <td>{meanStd(row.accuracy)}</td>
-              <td>{meanStd(row.precision)}</td>
+      <div className="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Target</th>
+              <th>Model</th>
+              <th>ROC-AUC</th>
+              <th>F1</th>
+              <th>Recall</th>
+              <th>Accuracy</th>
+              <th>Precision</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {Object.entries(metrics?.targets || {}).map(([key, row]) => (
+              <tr key={key}>
+                <td>{key.toUpperCase()}</td>
+                <td>{row.chosen_model}</td>
+                <td>{meanStd(row.roc_auc)}</td>
+                <td>{meanStd(row.f1)}</td>
+                <td>{meanStd(row.recall)}</td>
+                <td>{meanStd(row.accuracy)}</td>
+                <td>{meanStd(row.precision)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <div className="figureGrid">
         {figures.map((name) => (
           <figure key={name}>
-            <img src={figureUrl(name)} alt={name} />
+            <img src={figureUrl(name)} alt={name} loading="lazy" />
             <figcaption>{name}</figcaption>
           </figure>
         ))}
